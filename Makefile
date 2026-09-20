@@ -6,7 +6,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 qemu:
-	qemu-system-i386 -kernel kernel/halogen.kernel
+	qemu-system-i386 -kernel kernel/build/halogen.kernel
 
 clean:
 	for dir in $(SUBDIRS); do $(MAKE) -C $$dir clean; done
