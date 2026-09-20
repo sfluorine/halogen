@@ -15,7 +15,7 @@ section '.multiboot' align 4
 
 section '.bss' align 16
 stack_bottom:
-	rb 16384
+	rb 0x4000
 stack_top:
 
 section '.text' executable
