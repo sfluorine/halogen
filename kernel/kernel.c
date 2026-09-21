@@ -2,5 +2,10 @@
 
 void kmain()
 {
-	terminalPutChar('9');
+	terminalInit();
+	terminalPutChar('H');
+	terminalPutChar('e');
+	terminalPutChar('l');
+	terminalPutChar('l');
+	terminalPutChar('o');
 }
