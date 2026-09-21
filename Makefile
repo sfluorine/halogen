@@ -1,6 +1,6 @@
 SUBDIRS = kernel
 
-all: $(SUBDIRS) qemu
+all: $(SUBDIRS)
 
 $(SUBDIRS):
 	$(MAKE) -C $@
