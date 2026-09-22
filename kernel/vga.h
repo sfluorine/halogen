@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define VGA_BUFFER			0xB8000
+#define VGA_BUFFER			0xC00B8000
 #define VGA_BUFFER_WIDTH	80
 #define VGA_BUFFER_HEIGHT	25
 

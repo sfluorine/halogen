@@ -51,7 +51,8 @@ _start:
 	add edi, 0x4
 	loop .fill_page_table
 
-	mov eax, (page_directory - 0xC0000000)
+	mov eax, cr3
+	or eax, (page_directory - 0xC0000000)
 	mov cr3, eax
 
 	mov eax, cr4
@@ -66,6 +67,9 @@ _start:
 	jmp eax
 
 higher_half:
+	mov dword [page_directory], 0
+	invlpg [0]
+
 	mov esp, stack_top
 	call kmain
 
