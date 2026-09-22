@@ -31,28 +31,28 @@ void terminalPutChar(char c)
 {
 	if (c == '\n') {
 		g_cursorColumn = 0;
-		g_cursorRow += 1;
-		return;
+		g_cursorRow++;
+	} else {
+		g_vgaBuffer[g_cursorRow * VGA_BUFFER_WIDTH + g_cursorColumn] = vgaEncode(c, g_foreColor, g_backColor);
+		g_cursorColumn++;
 	}
 
-	g_vgaBuffer[g_cursorRow * VGA_BUFFER_WIDTH + g_cursorColumn] = vgaEncode(c, g_foreColor, g_backColor);
-
-	if (++g_cursorColumn >= VGA_BUFFER_WIDTH) {
+	if (g_cursorColumn >= VGA_BUFFER_WIDTH) {
 		g_cursorColumn = 0;
+		g_cursorRow++;
+	}
 
-		// terminal scrolling
-		if (++g_cursorRow >= VGA_BUFFER_HEIGHT) {
-			// shift rows up by one
-			for (int y = 1; y < VGA_BUFFER_HEIGHT; y++) {
-				for (int x = 0; x < VGA_BUFFER_WIDTH; x++)
-					g_vgaBuffer[(y - 1) * VGA_BUFFER_WIDTH + x] = g_vgaBuffer[y * VGA_BUFFER_WIDTH + x];
-			}
-
-			// clear the last row for printing
+	if (g_cursorRow >= VGA_BUFFER_HEIGHT) {
+		// shift rows up by one
+		for (int y = 1; y < VGA_BUFFER_HEIGHT; y++) {
 			for (int x = 0; x < VGA_BUFFER_WIDTH; x++)
-				g_vgaBuffer[(VGA_BUFFER_HEIGHT - 1) * VGA_BUFFER_WIDTH + x] = vgaEncode(' ', VGA_COLOR_BLACK, VGA_COLOR_BLACK);
-
-			g_cursorRow = (VGA_BUFFER_HEIGHT - 1);
+				g_vgaBuffer[(y - 1) * VGA_BUFFER_WIDTH + x] = g_vgaBuffer[y * VGA_BUFFER_WIDTH + x];
 		}
+
+		// clear the last row for printing
+		for (int x = 0; x < VGA_BUFFER_WIDTH; x++)
+			g_vgaBuffer[(VGA_BUFFER_HEIGHT - 1) * VGA_BUFFER_WIDTH + x] = vgaEncode(' ', VGA_COLOR_BLACK, VGA_COLOR_BLACK);
+
+		g_cursorRow = (VGA_BUFFER_HEIGHT - 1);
 	}
 }
