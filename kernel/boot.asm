@@ -7,9 +7,9 @@ MAGIC		= 0x1BADB002
 CHECKSUM	= -(MAGIC + FLAGS)
 
 ; 4 MB Page Size Extension bit in CR4
-CR4_PSE = 0x00000010
+CR4_PSE = 1 shl 4
 ; Paging enable bit in CR0
-CR0_PG = 0x80000000
+CR0_PG = 1 shl 31
 
 extrn kmain
 
@@ -24,17 +24,33 @@ stack_bottom:
 stack_top:
 
 section '.data' align 4096
+
+public page_table
+
 page_directory:
 	dd 0x00000083
 	times (768 - 1) dd 0
 	dd 0x00000083
 	times (1024 - 769) dd 0
 
+page_table:
+	times 1024 dd 0
+
 section '.text' executable
 
 public _start
 
 _start:
+	mov edi, (page_table - 0xC0000000)
+	mov eax, 0x3
+	mov ecx, 1024
+
+.fill_page_table:
+	mov [edi], eax
+	add eax, 0x1000
+	add edi, 0x4
+	loop .fill_page_table
+
 	mov eax, (page_directory - 0xC0000000)
 	mov cr3, eax
 
