@@ -6,6 +6,11 @@ FLAGS		= ALIGNBIT or MEMINFO
 MAGIC		= 0x1BADB002
 CHECKSUM	= -(MAGIC + FLAGS)
 
+; 4 MB Page Size Extension bit in CR4
+CR4_PSE = 0x00000010
+; Paging enable bit in CR0
+CR0_PG = 0x80000000
+
 extrn kmain
 
 section '.multiboot' align 4
@@ -19,44 +24,32 @@ stack_bottom:
 stack_top:
 
 section '.data' align 4096
-page_directory:   dd 1024 dup 0
-first_page_table: dd 1024 dup 0
+page_directory:
+	dd 0x00000083
+	times (768 - 1) dd 0
+	dd 0x00000083
+	times (1024 - 769) dd 0
 
 section '.text' executable
 
 public _start
 
 _start:
+	mov eax, (page_directory - 0xC0000000)
+	mov cr3, eax
 
-    xor ecx, ecx
-.fill_table:
-    mov eax, ecx
-    shl eax, 12                 ; ecx * 0x1000
-    or  eax, 3
-    mov [first_page_table + ecx*4], eax
-    inc ecx
-    cmp ecx, 1024
-    jne .fill_table
+	mov eax, cr4
+	or eax, CR4_PSE
+	mov cr4, eax
 
-    xor ecx, ecx
-.fill_dir:
-    mov dword [page_directory + ecx*4], 2
-    inc ecx
-    cmp ecx, 1024
-    jne .fill_dir
+	mov eax, cr0
+	or eax, CR0_PG
+	mov cr0, eax
 
-    ; directory entry 0 -> first page table
-    mov eax, first_page_table
-    or  eax, 3
-    mov [page_directory], eax
+	lea eax, [higher_half]
+	jmp eax
 
-    mov eax, page_directory
-    mov cr3, eax
-
-    mov eax, cr0
-    or  eax, 0x80000000
-    mov cr0, eax
-
+higher_half:
 	mov esp, stack_top
 	call kmain
 
