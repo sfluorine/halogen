@@ -2,8 +2,6 @@
 
 #include <stddef.h>
 
-extern uint32_t page_table[1024];
-
 static size_t strlen(const char* str)
 {
 	size_t i = 0;
@@ -42,7 +40,7 @@ void kmain()
 	terminalInit();
 
 	for (size_t i = 0; i < 1024; i++) {
-		printInteger(page_table[i]);
+		printInteger(69420);
 		putCStr("\n");
 	}
 }

@@ -25,8 +25,6 @@ stack_top:
 
 section '.data' align 4096
 
-public page_table
-
 page_directory:
 	dd 0x00000083
 	times (768 - 1) dd 0
@@ -36,23 +34,37 @@ page_directory:
 page_table:
 	times 1024 dd 0
 
+section '.rodata' align 8
+
+gdt_start:
+	dd 0x00000000
+	dd 0x00000000
+
+	dw 0xFFFF
+	dw 0x0000
+	db 0x00
+	db 10011010b
+    db 11001111b
+    db 0x00
+
+	dw 0xFFFF
+    dw 0x0000
+    db 0x00
+	db 10010010b
+    db 11001111b
+    db 0x00
+gdt_end:
+
+gdt_ptr:
+	dw gdt_end - gdt_start - 1
+	dd gdt_start
+
 section '.text' executable
 
 public _start
 
 _start:
-	mov edi, (page_table - 0xC0000000)
-	mov eax, 0x3
-	mov ecx, 1024
-
-.fill_page_table:
-	mov [edi], eax
-	add eax, 0x1000
-	add edi, 0x4
-	loop .fill_page_table
-
-	mov eax, cr3
-	or eax, (page_directory - 0xC0000000)
+	mov eax, (page_directory - 0xC0000000)
 	mov cr3, eax
 
 	mov eax, cr4
@@ -67,6 +79,18 @@ _start:
 	jmp eax
 
 higher_half:
+	lgdt [gdt_ptr]
+
+	jmp 0x08:.reload_cs
+
+.reload_cs:
+	mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
 	mov dword [page_directory], 0
 	invlpg [0]
 
